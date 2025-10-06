@@ -22,6 +22,6 @@ def plot_results(all_rewards, stage_rewards, stages, episodes_per_stage):
     plt.grid(True, axis="y")
 
     plt.tight_layout()
-    plt.show()
+    plt.savefig("main.png")
 
 

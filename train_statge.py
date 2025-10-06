@@ -1,27 +1,28 @@
 from DQNAgent import DQNAgent
 from LineWorld import LineWorld
 from utils import plot_results
-def train_curriculum():
-    stages = [5, 10, 20, 50,100]  # 簡単→難しい
-    agent = DQNAgent()
+
+def train_each_episode_new_agent():
+    stages = [5, 10, 20, 50, 100]  # 簡単→難しい
     episodes_per_stage = 1000
-    
-    # 🔹 グラフ用に記録
+
+    # 🔹 記録用
     stage_rewards = []  # 各ステージの平均報酬
-    all_rewards = []    # 全エピソードの推移
-    
+    all_rewards = []    # 全エピソードの報酬推移
+
     for length in stages:
         env = LineWorld(length)
         rewards = []
 
-        print(f"\n=== カリキュラム Stage: ゴール距離 = {length} ===")
-
+        print(f"\n=== ステージ: ゴール距離 = {length} ===")
 
         for epi in range(episodes_per_stage):
+            # 🔸 各エピソードで新しいエージェントを生成
+            agent = DQNAgent()
             state = env.reset()
             done = False
             total_reward = 0
-            eps = max(0.1, 0.9 - epi * 0.001)  # ε-greedy減衰
+            eps = max(0.1, 0.9 - epi * 0.001)  # ε-greedy減衰（統一）
 
             while not done:
                 action = agent.actions(state, eps)
@@ -34,18 +35,18 @@ def train_curriculum():
             rewards.append(total_reward)
             all_rewards.append(total_reward)
 
+            # 進捗表示
             if (epi + 1) % 50 == 0:
                 avg_reward = sum(rewards[-50:]) / 50
                 print(f"Episode {epi+1}: total_reward = {total_reward:.2f}, avg(last50)={avg_reward:.2f}")
-        # ステージごとにターゲットネット更新
-        agent.update_target()
-        
-        # ステージ平均を記録
+
+        # ステージごとの平均報酬
         avg_stage_reward = sum(rewards) / len(rewards)
         stage_rewards.append(avg_stage_reward)
-    
+
     # グラフ描画
     plot_results(all_rewards, stage_rewards, stages, episodes_per_stage)
 
+
 if __name__ == "__main__":
-    train_curriculum()
+    train_each_episode_new_agent()
